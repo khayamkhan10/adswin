@@ -318,15 +318,30 @@ function startCountdown(){
   update();setInterval(update,1000);
 }
 
+// Ad URLs — index 0 = Ad#1, index 1 = Ad#2, rest = null (no redirect)
+const AD_URLS = [
+  'https://www.effectivegatecpm.com/mj66hjawhq?key=f3dd17daf2fa8d912411271d8c55b53b',   // Ad #1
+  'https://www.effectivegatecpm.com/esqmnyj7?key=aaa1e99ba08b4ce6783b8c070b62f68f',     // Ad #2
+  'https://www.effectivegatecpm.com/ihv0f5tks?key=5f2d014c0c105877c10f1f185861abd4',    // Ad #3
+  'https://www.effectivegatecpm.com/a1fzipwjd?key=8f2df7190250413597c69a5514fb273a',    // Ad #4
+  'https://www.effectivegatecpm.com/qjtx7c1i?key=420d88f08bac878bfbdf82de6a46a039',     // Ad #5
+  'https://www.effectivegatecpm.com/vr55myjbs?key=ed767e9cf47709ba29cf5adcf4f949f8',    // Ad #6
+  'https://www.effectivegatecpm.com/m87c4jbfr8?key=bebc1d2a4fa123ec7cb9d1a224c48700',   // Ad #7
+  'https://www.effectivegatecpm.com/jschfa7q?key=e0385dbed417a26cd42a54cb3b92d934',     // Ad #8
+];
+
 async function pageInit(){
   const container=document.getElementById('adsContainer');
   container.innerHTML='';
   for(let i=1;i<=8;i++){
     const w=watchedToday.includes(i);
+    const hasUrl = AD_URLS[i-1] ? true : false;
+    const adLabel = hasUrl ? `<span class="absolute top-2 left-2 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full">Sponsored</span>` : '';
     container.innerHTML+=`
       <div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
-        <div class="h-32 bg-gradient-to-br from-gray-800 to-gray-700 flex items-center justify-center relative">
+        <div class="h-32 bg-gradient-to-br ${hasUrl ? 'from-blue-700 to-[#1e3a8a]' : 'from-gray-800 to-gray-700'} flex items-center justify-center relative">
           <i class="fa-solid fa-play-circle text-5xl text-white/40"></i>
+          ${adLabel}
           <span class="absolute top-2 right-2 bg-[#fbbf24] text-[#1e3a8a] text-xs font-bold px-2 py-1 rounded-full">+1 Ticket</span>
         </div>
         <div class="p-5 text-center">
@@ -348,9 +363,27 @@ async function watchAd(btn,adId){
     return;
   }
   if(watchedToday.includes(adId)){Swal.fire({toast:true,position:'top-end',icon:'info',title:'Already watched today!',showConfirmButton:false,timer:2000});return;}
+
+  // Open ad URL in new tab for Ad #1 and Ad #2
+  const adUrl = AD_URLS[adId-1];
+  if(adUrl){
+    window.open(adUrl, '_blank');
+  }
+
   btn.innerHTML='<i class="fa-solid fa-spinner fa-spin mr-1"></i> Playing...';
   btn.classList.add('opacity-70','cursor-not-allowed');btn.disabled=true;
-  await new Promise(r=>setTimeout(r,2500));
+
+  // Wait 30 seconds for ad to be "watched"
+  let secs = 30;
+  const interval = setInterval(()=>{
+    secs--;
+    btn.innerHTML=`<i class="fa-solid fa-spinner fa-spin mr-1"></i> ${secs}s...`;
+    if(secs<=0) clearInterval(interval);
+  }, 1000);
+
+  await new Promise(r=>setTimeout(r, 30000));
+  clearInterval(interval);
+
   try{
     const {error:le}=await db.from('ads_log').insert({user_id:currentUser.id,ad_number:adId,watched_date:todayDate});
     if(le&&le.code!=='23505')throw le;
