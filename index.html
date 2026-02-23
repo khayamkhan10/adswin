@@ -137,7 +137,7 @@ body{font-family:'Poppins',sans-serif;background:#f8fafc;}
   <div class="bg-gradient-to-r from-[#1e3a8a] to-blue-900 rounded-2xl p-8 text-white shadow-xl flex flex-col md:flex-row items-center justify-between mb-8 gap-6">
     <div class="text-center md:text-left">
       <h2 class="text-4xl font-extrabold text-[#fbbf24] mb-2">$1,000,000 Mega Draw!</h2>
-      <p class="text-gray-300 text-lg">Next draw in: <span id="countdownDisplay" class="font-bold text-white bg-white/20 px-3 py-1 rounded-lg">--</span></p>
+      <p class="text-gray-300 text-lg">🎉 Draw date will be announced soon — stay tuned!</p>
     </div>
     <div class="bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-xl text-center shadow-lg min-w-[160px]">
       <p class="text-sm text-blue-200 uppercase tracking-wide mb-1">Your Total Tickets</p>
@@ -183,7 +183,7 @@ let currentUser=null,profile=null,watchedToday=[];
 const todayDate=new Date().toISOString().split('T')[0];
 
 window.onload=async()=>{
-  if(typeof startCountdown==='function') startCountdown();
+  
   const {data:{session}}=await db.auth.getSession();
   if(session){currentUser=session.user;await loadProfile();}
   document.getElementById('loadingScreen').style.display='none';
