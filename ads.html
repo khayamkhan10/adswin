@@ -334,7 +334,8 @@ async function pageInit(){
   const container=document.getElementById('adsContainer');
   container.innerHTML='';
   for(let i=1;i<=8;i++){
-    const w=watchedToday.includes(i);
+    // Watched only applies to logged in users
+    const w = currentUser && watchedToday.includes(i);
     const hasUrl = AD_URLS[i-1] ? true : false;
     const adLabel = hasUrl ? `<span class="absolute top-2 left-2 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full">Sponsored</span>` : '';
     container.innerHTML+=`
@@ -358,30 +359,44 @@ async function pageInit(){
 }
 
 async function watchAd(btn,adId){
+
+  // Open ad URL regardless of login — revenue for everyone
+  const adUrl = AD_URLS[adId-1];
+  if(adUrl){ window.open(adUrl, '_blank'); }
+
+  // If not logged in — play ad but no ticket, show login prompt after
   if(!currentUser){
-    Swal.fire({icon:'warning',title:'Login Required',text:'Please Login or Sign Up to save your tickets!',showCancelButton:true,confirmButtonText:'Go to Login',confirmButtonColor:'#1e3a8a',cancelButtonText:'Cancel'}).then(r=>{if(r.isConfirmed)showAuthScreen();});
+    btn.innerHTML='<i class="fa-solid fa-spinner fa-spin mr-1"></i> Playing...';
+    btn.classList.add('opacity-70','cursor-not-allowed');btn.disabled=true;
+    let secs=30;
+    const iv=setInterval(()=>{ secs--; btn.innerHTML=`<i class="fa-solid fa-spinner fa-spin mr-1"></i> ${secs}s...`; if(secs<=0)clearInterval(iv); },1000);
+    await new Promise(r=>setTimeout(r,30000));
+    clearInterval(iv);
+    btn.innerHTML='Watch Ad';btn.classList.remove('opacity-70','cursor-not-allowed');btn.disabled=false;
+    Swal.fire({
+      icon:'info',
+      title:'Ad Watched! 👏',
+      html:'<p>Login or Sign Up to <strong>save your ticket</strong> and enter the $1M draw!</p>',
+      showCancelButton:true,
+      confirmButtonText:'Login / Sign Up',
+      confirmButtonColor:'#1e3a8a',
+      cancelButtonText:'Maybe Later'
+    }).then(r=>{ if(r.isConfirmed) showAuthScreen(); });
     return;
   }
-  if(watchedToday.includes(adId)){Swal.fire({toast:true,position:'top-end',icon:'info',title:'Already watched today!',showConfirmButton:false,timer:2000});return;}
 
-  // Open ad URL in new tab for Ad #1 and Ad #2
-  const adUrl = AD_URLS[adId-1];
-  if(adUrl){
-    window.open(adUrl, '_blank');
+  // Logged in — full flow with ticket
+  if(watchedToday.includes(adId)){
+    Swal.fire({toast:true,position:'top-end',icon:'info',title:'Already watched today!',showConfirmButton:false,timer:2000});
+    return;
   }
 
   btn.innerHTML='<i class="fa-solid fa-spinner fa-spin mr-1"></i> Playing...';
   btn.classList.add('opacity-70','cursor-not-allowed');btn.disabled=true;
 
-  // Wait 30 seconds for ad to be "watched"
-  let secs = 30;
-  const interval = setInterval(()=>{
-    secs--;
-    btn.innerHTML=`<i class="fa-solid fa-spinner fa-spin mr-1"></i> ${secs}s...`;
-    if(secs<=0) clearInterval(interval);
-  }, 1000);
-
-  await new Promise(r=>setTimeout(r, 30000));
+  let secs=30;
+  const interval=setInterval(()=>{ secs--; btn.innerHTML=`<i class="fa-solid fa-spinner fa-spin mr-1"></i> ${secs}s...`; if(secs<=0)clearInterval(interval); },1000);
+  await new Promise(r=>setTimeout(r,30000));
   clearInterval(interval);
 
   try{
