@@ -146,7 +146,7 @@ body{font-family:'Poppins',sans-serif;background:#f8fafc;}
       <div><h3 class="text-lg font-bold text-gray-800 mb-2">3. Anti-Fraud</h3><p>Bots, VPNs, multiple accounts, or fake referrals result in immediate permanent ban and forfeiture of all tickets.</p></div>
       <div><h3 class="text-lg font-bold text-gray-800 mb-2">4. Draw & Prizes</h3><p>Weekly draws every Sunday. Winners selected randomly. Prize winnings may be subject to local taxes.</p></div>
       <div><h3 class="text-lg font-bold text-gray-800 mb-2">5. Referral Program</h3><p>Referral abuse (fake accounts, self-referral) results in permanent ban. 10% lifetime rate applies to organically earned tickets only.</p></div>
-      <div><h3 class="text-lg font-bold text-gray-800 mb-2">6. Contact</h3><p>Legal inquiries: legal@adswin.com — Response within 3 business days.</p></div>
+      <div><h3 class="text-lg font-bold text-gray-800 mb-2">6. Contact</h3><p>Legal inquiries: <a href="mailto:legal@adswin.online" class="text-[#1e3a8a] hover:underline">legal@adswin.online</a> — Response within 3 business days.</p></div>
     </div>
   </div>
 </section>
@@ -155,7 +155,7 @@ body{font-family:'Poppins',sans-serif;background:#f8fafc;}
   </main>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 const SB_URL='https://nsahygsuuinthcbjsaod.supabase.co',SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zYWh5Z3N1dWludGhjYmpzYW9kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MjE1MzMsImV4cCI6MjA4NzE5NzUzM30.08y2nDCpVHlq3j4xrcFMjtaVwQnwKyfWDpDVsXNfFzg';
 const {createClient}=supabase;
 const db=createClient(SB_URL,SB_KEY);
@@ -295,14 +295,4 @@ function startCountdown(){
   function update(){
     const now=new Date(),target=new Date();
     target.setDate(target.getDate()+(7-target.getDay()));target.setHours(0,0,0,0);
-    const diff=target-now,el=document.getElementById('countdownDisplay');if(!el)return;
-    if(diff<=0){el.innerText='🎉 Draw Today!';return;}
-    const d=Math.floor(diff/86400000),h=Math.floor((diff%86400000)/3600000),
-          m=Math.floor((diff%3600000)/60000),s=Math.floor((diff%60000)/1000);
-    el.innerText=`${d}d : ${String(h).padStart(2,'0')}h : ${String(m).padStart(2,'0')}m : ${String(s).padStart(2,'0')}s`;
-  }
-  update();setInterval(update,1000);
-}
-async function pageInit(){}
-</script>
-</body></html>
+    const diff=target-now,el=document.getElemen
