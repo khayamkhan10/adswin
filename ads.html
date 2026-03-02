@@ -400,15 +400,49 @@ async function watchAd(btn,adId){
   clearInterval(interval);
 
   try{
-    const {error:le}=await db.from('ads_log').insert({user_id:currentUser.id,ad_number:adId,watched_date:todayDate});
-    if(le&&le.code!=='23505')throw le;
-    const {data:updated,error:ue}=await db.from('profiles').update({tickets:(profile.tickets||0)+1,ads_watched:(profile.ads_watched||0)+1}).eq('id',currentUser.id).select().single();
-    if(ue)throw ue;
-    profile=updated;watchedToday.push(adId);updateUI();await pageInit();
-    Swal.fire({title:'Awesome! 🎉',html:`<p>1 Ticket earned! Total: <strong>${profile.tickets} tickets</strong></p>`,icon:'success',confirmButtonColor:'#fbbf24'});
-  }catch(err){
-    console.error(err);btn.innerHTML='Watch Ad';btn.classList.remove('opacity-70','cursor-not-allowed');btn.disabled=false;
-    Swal.fire({icon:'error',title:'Error',text:'Could not save ticket. Please try again.'});
+    // Step 1: Insert ads_log
+    const {error:le} = await db.from('ads_log').insert({
+      user_id: currentUser.id,
+      ad_number: adId,
+      watched_date: todayDate
+    });
+    // Ignore duplicate error (already watched)
+    if(le && le.code !== '23505'){
+      console.error('ads_log error:', le);
+      throw new Error(le.message);
+    }
+
+    // Step 2: Get latest profile first then increment
+    const {data:freshProfile, error:fe} = await db.from('profiles').select('tickets,ads_watched').eq('id',currentUser.id).single();
+    if(fe){ console.error('fetch profile error:', fe); throw new Error(fe.message); }
+
+    const newTickets = (freshProfile.tickets || 0) + 1;
+    const newAdsWatched = (freshProfile.ads_watched || 0) + 1;
+
+    // Step 3: Update profile
+    const {data:updated, error:ue} = await db.from('profiles')
+      .update({tickets: newTickets, ads_watched: newAdsWatched})
+      .eq('id', currentUser.id)
+      .select()
+      .single();
+    if(ue){ console.error('profile update error:', ue); throw new Error(ue.message); }
+
+    profile = updated;
+    watchedToday.push(adId);
+    updateUI();
+    await pageInit();
+    Swal.fire({
+      title:'Awesome! 🎉',
+      html:`<p>1 Ticket earned! Total: <strong>${profile.tickets} tickets</strong></p>`,
+      icon:'success',
+      confirmButtonColor:'#fbbf24'
+    });
+  } catch(err){
+    console.error('watchAd error:', err);
+    btn.innerHTML='Watch Ad';
+    btn.classList.remove('opacity-70','cursor-not-allowed');
+    btn.disabled=false;
+    Swal.fire({icon:'error',title:'Error',text: err.message || 'Could not save ticket. Please try again.'});
   }
 }
 
